@@ -169,5 +169,63 @@ extern void strbuf_add(struct strbuf *, const void *, size_t);
  * any) in the buffer.
  */
 extern int strbuf_getwholeline(struct strbuf *, FILE *, int);
+extern int strbuf_getline(struct strbuf *, FILE *, int);
+
+
+
+/*
+ * Split str (of length slen) at the specified terminator character.
+ * Return a null-terminated array of pointers to strbuf objects
+ * holding the substrings.  The substrings include the terminator,
+ * except for the last substring, which might be unterminated if the
+ * original string did not end with a terminator.  If max is positive,
+ * then split the string into at most max substrings (with the last
+ * substring containing everything following the (max-1)th terminator
+ * character).
+ *
+ * For lighter-weight alternatives, see string_list_split() and
+ * string_list_split_in_place().
+ */
+extern struct strbuf **strbuf_split_buf(const char *, size_t,
+					int terminator, int max);
+
+/*
+ * Split a NUL-terminated string at the specified terminator
+ * character.  See strbuf_split_buf() for more information.
+ */
+static inline struct strbuf **strbuf_split_str(const char *str,
+					       int terminator, int max)
+{
+	return strbuf_split_buf(str, strlen(str), terminator, max);
+}
+
+/*
+ * Split a strbuf at the specified terminator character.  See
+ * strbuf_split_buf() for more information.
+ */
+static inline struct strbuf **strbuf_split_max(const struct strbuf *sb,
+						int terminator, int max)
+{
+	return strbuf_split_buf(sb->buf, sb->len, terminator, max);
+}
+
+/*
+ * Split a strbuf at the specified terminator character.  See
+ * strbuf_split_buf() for more information.
+ */
+static inline struct strbuf **strbuf_split(const struct strbuf *sb,
+					   int terminator)
+{
+	return strbuf_split_max(sb, terminator, 0);
+}
+
+extern void strbuf_insert(struct strbuf *, size_t pos, const void *, size_t);
+extern void strbuf_remove(struct strbuf *, size_t pos, size_t len);
+
+/* splice pos..pos+len with given data */
+extern void strbuf_splice(struct strbuf *, size_t pos, size_t len,
+                          const void *, size_t);
+
+extern void strbuf_list_free(struct strbuf **sbs);
 
 #endif /*STRBUF_H*/
